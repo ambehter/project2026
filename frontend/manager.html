@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Панель менеджера</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">🍽 RestBook</div>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="restaurants.html">Рестораны</a>
+      <span id="user-links">
+        <a href="profile.html">Личный кабинет</a>
+        <a id="manager-link" href="manager.html">Панель менеджера</a>
+        <span class="user-info" id="user-name"></span>
+        <a href="#" id="logout-btn">Выйти</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Панель менеджера</h1>
+  <div id="access-msg"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="profile-tabs">
+    <button class="tab-btn active" data-tab="bookings">Брони</button>
+    <button class="tab-btn" data-tab="halls">Залы</button>
+    <button class="tab-btn" data-tab="tables">Столики</button>
+  </div>
+
+  <section class="tab-panel" id="panel-bookings">
+    <div class="filters">
+      <select id="b-status">
+        <option value="">Все статусы</option>
+        <option value="pending">Ожидает</option>
+        <option value="confirmed">Подтверждена</option>
+        <option value="cancelled">Отменена</option>
+      </select>
+      <input type="date" id="b-date">
+      <button class="btn" id="b-refresh">Обновить</button>
+    </div>
+    <div id="bookings-box"></div>
+  </section>
+
+  <section class="tab-panel hidden" id="panel-halls">
+    <div class="card" style="margin-bottom:16px;">
+      <h2>Новый зал</h2>
+      <div id="hall-msg"></div>
+      <form id="hall-form" class="filters">
+        <input type="text" name="name" placeholder="Название" required>
+        <input type="number" name="capacity" placeholder="Вместимость" min="1" required>
+        <button class="btn" type="submit">Создать</button>
+      </form>
+    </div>
+    <div id="halls-box"></div>
+  </section>
+
+  <section class="tab-panel hidden" id="panel-tables">
+    <div class="card" style="margin-bottom:16px;">
+      <h2>Новый столик</h2>
+      <div id="table-msg"></div>
+      <form id="table-form" class="filters">
+        <select name="hall_id" id="hall-select" required></select>
+        <input type="text" name="number" placeholder="Номер" required>
+        <input type="number" name="seats" placeholder="Мест" min="1" required>
+        <button class="btn" type="submit">Создать</button>
+      </form>
+    </div>
+    <div id="tables-box"></div>
+  </section>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/manager.js"></script>
+</body>
+</html>

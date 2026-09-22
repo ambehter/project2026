@@ -1,0 +1,1136 @@
+/* Общие стили */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f9f5f0;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Скрытие элементов (вместо инлайн-стилей) */
+.hidden {
+    display: none !important;
+}
+
+/* Шапка сайта */
+header {
+    background: #ff7e5f;
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    display: inline-block;
+}
+
+nav {
+    float: right;
+    margin-top: 0.5rem;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Поиск */
+#search {
+    margin: 2rem 0;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+#searchInput {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 200px;
+}
+
+#searchBtn {
+    padding: 0.8rem 2rem;
+    background: #ff7e5f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#searchBtn:hover {
+    background: #e6694a;
+}
+
+/* Список ресторанов (грид) */
+#restaurantList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Карточка ресторана */
+.restaurant-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.restaurant-card:hover {
+    transform: translateY(-5px);
+}
+
+.restaurant-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.restaurant-card .info {
+    padding: 1rem;
+}
+
+.restaurant-card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.restaurant-card p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.restaurant-card .btn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    background: #ff7e5f;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.restaurant-card .btn:hover {
+    background: #e6694a;
+}
+
+/* Стили для форм */
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+form input,
+form select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 150px;
+}
+
+form button {
+    padding: 0.5rem 1.5rem;
+    background: #ff7e5f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background: #e6694a;
+}
+
+/* Стили для таблиц */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+table th,
+table td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background: #ff7e5f;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background: #f9f5f0;
+}
+
+table tr:hover {
+    background: #f0e8e0;
+}
+
+/* Кнопки действий */
+.btn-action {
+    padding: 0.3rem 0.8rem;
+    margin: 0 0.2rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.btn-confirm {
+    background: #4CAF50;
+}
+
+.btn-confirm:hover {
+    background: #45a049;
+}
+
+.btn-cancel {
+    background: #f44336;
+}
+
+.btn-cancel:hover {
+    background: #da190b;
+}
+
+.btn-edit {
+    background: #2196F3;
+}
+
+.btn-edit:hover {
+    background: #1976D2;
+}
+
+/* Сетка столиков */
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.table-btn {
+    padding: 0.8rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.table-btn:hover {
+    border-color: #ff7e5f;
+    transform: scale(1.05);
+}
+
+.table-btn.selected {
+    border-color: #ff7e5f;
+    background: #fff0eb;
+}
+
+.table-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.table-btn .seats {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Модальные окна */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+/* Уведомления и сообщения */
+.alert {
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Адаптив для мобильных устройств */
+@media (max-width: 600px) {
+    nav {
+        float: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    nav a {
+        margin-left: 0;
+        font-size: 0.9rem;
+    }
+    
+    #search {
+        flex-direction: column;
+    }
+    
+    #searchBtn {
+        width: 100%;
+    }
+    
+    #restaurantList {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .modal-content {
+        padding: 1rem;
+        width: 95%;
+    }
+    
+    table {
+        font-size: 0.9rem;
+    }
+    
+    table th,
+    table td {
+        padding: 0.5rem;
+    }
+    
+    .tables-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+}
+
+/* Адаптив для планшетов */
+@media (min-width: 601px) and (max-width: 1024px) {
+    #restaurantList {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    
+    .container {
+        padding: 0 0.5rem;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.restaurant-card {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Стили для загрузки */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+/* Badge для статусов */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge-pending {
+    background: #ffc107;
+    color: #856404;
+}
+
+.badge-confirmed {
+    background: #28a745;
+    color: white;
+}
+
+.badge-cancelled {
+    background: #dc3545;
+    color: white;
+}
+/* Стили для страницы деталей ресторана */
+.booking-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.filter-input {
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #ff7e5f;
+    box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.2);
+}
+
+.btn-primary {
+    padding: 0.6rem 2rem;
+    background: #ff7e5f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background 0.3s;
+    min-width: 150px;
+    height: 42px;
+    align-self: center;
+}
+
+.btn-primary:hover {
+    background: #e6694a;
+}
+
+.btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Сетка столиков (уже есть в стилях, но для уверенности) */
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+}
+
+/* Стили для информации о ресторане */
+.restaurant-info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.restaurant-info .address {
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.restaurant-info .cuisine {
+    display: inline-block;
+    background: #ff7e5f;
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+/* Сообщение о бронировании */
+#bookingMessage {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+#bookingMessage.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#bookingMessage.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#bookingMessage.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Адаптив для страницы ресторана */
+@media (max-width: 768px) {
+    .booking-filters {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .btn-primary {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .tables-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tables-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 0.5rem;
+    }
+    
+    .filter-input {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+}
+/* Стили для панели управления менеджера */
+
+/* Статистика */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #ff7e5f;
+    margin-bottom: 0.3rem;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Фильтры менеджера */
+.manager-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    align-items: flex-end;
+}
+
+.manager-filters .filter-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.manager-filters .filter-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.3rem;
+}
+
+.btn-secondary {
+    padding: 0.6rem 1.5rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.3s;
+    height: 42px;
+    align-self: center;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-success {
+    padding: 0.6rem 1.5rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.3s;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-danger {
+    padding: 0.3rem 0.8rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* Таблица менеджера */
+.table-responsive {
+    overflow-x: auto;
+    margin: 1rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.manager-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    min-width: 800px;
+}
+
+.manager-table th {
+    background: #ff7e5f;
+    color: white;
+    padding: 0.8rem;
+    text-align: left;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.manager-table td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.manager-table tr:hover td {
+    background: #f9f5f0;
+}
+
+.manager-table .status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-badge.pending {
+    background: #ffc107;
+    color: #856404;
+}
+
+.status-badge.confirmed {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.cancelled {
+    background: #dc3545;
+    color: white;
+}
+
+/* Разделители */
+.section-divider {
+    margin: 2rem 0;
+    border: none;
+    border-top: 2px solid #eee;
+}
+
+/* Секции менеджера */
+.manager-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 1.5rem 0;
+}
+
+.manager-section h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+/* Формы менеджера */
+.manager-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+.manager-form .form-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.manager-form .form-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.3rem;
+}
+
+.manager-form .form-group input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.manager-form .form-group input:focus {
+    outline: none;
+    border-color: #ff7e5f;
+    box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.2);
+}
+
+/* Списки залов и столиков */
+.items-list {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.item-card {
+    background: #f9f5f0;
+    padding: 0.8rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-card .item-info {
+    flex: 1;
+}
+
+.item-card .item-name {
+    font-weight: bold;
+}
+
+.item-card .item-detail {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.item-card .item-actions {
+    margin-left: 0.5rem;
+}
+
+/* Пустое состояние */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    grid-column: 1 / -1;
+}
+
+/* Адаптив для панели менеджера */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .manager-filters {
+        flex-direction: column;
+    }
+    
+    .manager-filters .filter-group {
+        min-width: 100%;
+    }
+    
+    .manager-form {
+        flex-direction: column;
+    }
+    
+    .manager-form .form-group {
+        min-width: 100%;
+    }
+    
+    .manager-form button {
+        width: 100%;
+    }
+    
+    .items-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 0.8rem;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+}
+/* Стили для доступности */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Улучшенные стили для полей ввода с фокусом */
+.filter-input:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #ff7e5f;
+    outline-offset: 2px;
+    border-color: #ff7e5f;
+}
+
+/* Стили для сообщений с ролью alert */
+#profileMessage {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+#profileMessage.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#profileMessage.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#profileMessage.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Улучшенные стили для полей ввода в формах */
+.profile-form .form-group input:invalid:not(:placeholder-shown) {
+    border-color: #dc3545;
+}
+
+.profile-form .form-group input:invalid:not(:placeholder-shown):focus {
+    border-color: #dc3545;
+    outline-color: #dc3545;
+}
+
+.profile-form .form-group input:valid:not(:placeholder-shown) {
+    border-color: #28a745;
+}
+
+/* Стили для переключателя с улучшенной доступностью */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch input:focus-visible + .slider {
+    outline: 2px solid #ff7e5f;
+    outline-offset: 2px;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ccc;
+    transition: .4s;
+    border-radius: 26px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+    background: #ff7e5f;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/* Улучшенные стили для кнопок */
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-success:focus-visible,
+.btn-danger:focus-visible {
+    outline: 2px solid #ff7e5f;
+    outline-offset: 2px;
+}
+
+/* Улучшенные стили для select */
+select.filter-input {
+    appearance: auto;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 12px;
+}
+
+/* Стили для отображения ошибок валидации */
+.validation-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    display: none;
+}
+
+.validation-error.visible {
+    display: block;
+}
+.restaurant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.restaurant-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform .2s, box-shadow .2s;
+    display: flex;
+    flex-direction: column;
+}
+.restaurant-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+.restaurant-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+.restaurant-card .info {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.restaurant-card h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #222;
+}
+.restaurant-card .cuisine {
+    color: #ff6b35;
+    font-weight: 600;
+    font-size: .9rem;
+    margin: 0;
+}
+.restaurant-card .address,
+.restaurant-card .desc {
+    color: #666;
+    font-size: .85rem;
+    margin: 0;
+}
+.restaurant-card .btn {
+    margin-top: 10px;
+    align-self: flex-start;
+    background: #ff6b35;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: .9rem;
+    transition: background .2s;
+}
+.restaurant-card .btn:hover { background: #e85a28; }
+
+.load-more {
+    text-align: center;
+    margin: 30px 0;
+}
+/* Уменьшенная кнопка (для "Регистрация") */
+.btn-sm {
+  padding: 6px 14px;
+}
+
+/* Вводный абзац под заголовком h1 */
+.lead {
+  margin-bottom: 20px;
+  color: var(--muted);
+}

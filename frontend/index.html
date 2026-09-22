@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Поиск ресторанов и бронирование</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">🍽 RestBook</div>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="restaurants.html">Рестораны</a>
+      <span id="guest-links">
+        <a href="login.html">Войти</a>
+        <a href="register.html" class="btn btn-sm">Регистрация</a>
+      </span>
+      <span id="user-links" class="hidden">
+        <a href="profile.html">Личный кабинет</a>
+        <a id="manager-link" href="manager.html" class="hidden">Панель менеджера</a>
+        <span class="user-info" id="user-name"></span>
+        <a href="#" id="logout-btn">Выйти</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Найдите идеальный ресторан</h1>
+  <p class="lead">
+    Бронируйте столики онлайн в лучших ресторанах вашего города.
+  </p>
+  <a href="restaurants.html" class="btn">Смотреть рестораны →</a>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

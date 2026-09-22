@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ресторан</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">🍽 RestBook</div>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="restaurants.html">Рестораны</a>
+      <span id="guest-links">
+        <a href="login.html">Войти</a>
+        <a href="register.html" class="btn" style="padding:6px 14px;">Регистрация</a>
+      </span>
+      <span id="user-links" class="hidden">
+        <a href="profile.html">Личный кабинет</a>
+        <a id="manager-link" href="manager.html" class="hidden">Панель менеджера</a>
+        <span class="user-info" id="user-name"></span>
+        <a href="#" id="logout-btn">Выйти</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div id="rest" class="card"></div>
+
+  <div class="card" style="margin-top:20px;">
+    <h2>Забронировать столик</h2>
+    <div id="booking-msg"></div>
+    <div class="filters">
+      <input type="date" id="b-date">
+      <input type="time" id="b-time" value="19:00">
+      <input type="number" id="b-guests" value="2" min="1" max="12">
+      <button class="btn" id="check-btn">Проверить доступность</button>
+    </div>
+    <div id="tables" class="tables-grid"></div>
+    <div id="book-wrap" class="hidden" style="margin-top:16px;">
+      <p>Выбран столик №<b id="sel-num"></b> (<span id="sel-seats"></span> мест)</p>
+      <button class="btn" id="book-btn">Забронировать</button>
+    </div>
+  </div>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/booking.js"></script>
+</body>
+</html>

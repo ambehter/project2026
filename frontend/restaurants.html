@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Рестораны</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">🍽 RestBook</div>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="restaurants.html">Рестораны</a>
+      <span id="guest-links">
+        <a href="login.html">Войти</a>
+        <a href="register.html" class="btn" style="padding:6px 14px;">Регистрация</a>
+      </span>
+      <span id="user-links" class="hidden">
+        <a href="profile.html">Личный кабинет</a>
+        <a id="manager-link" href="manager.html" class="hidden">Панель менеджера</a>
+        <span class="user-info" id="user-name"></span>
+        <a href="#" id="logout-btn">Выйти</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Рестораны</h1>
+  <div class="filters">
+    <input id="search" type="text" placeholder="Поиск по названию, городу..." style="flex:1;min-width:220px;">
+    <input id="cuisine" type="text" placeholder="Кухня (например, Русская)">
+    <button class="btn" id="search-btn">Найти</button>
+  </div>
+  <div id="list" class="restaurant-grid"></div>
+  <div id="empty" class="empty-state hidden">Ничего не найдено</div>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+async function loadRestaurants() {
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  const params = {};
+  const s = document.getElementById('search').value.trim();
+  const c = document.getElementById('cuisine').value.trim();
+  if (s) params.search = s;
+  if (c) params.cuisine = c;
+
+  list.innerHTML = '<div class="empty-state">Загрузка...</div>';
+  try {
+    const data = await api.restaurants(params);
+    const items = data.items || [];
+    if (!items.length) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = items.map(r => `
+      <a class="restaurant-card" href="restaurant-detail.html?id=${r.id}">
+        <img src="${r.image_url || 'https://via.placeholder.com/400x200?text=Restaurant'}" alt="${r.name}">
+        <div class="restaurant-card-body">
+          <h3>${r.name}</h3>
+          <div class="muted">${r.cuisine || ''} · ${r.city || ''}</div>
+          <div class="muted">⭐ ${r.rating}</div>
+          <div class="muted">${r.address || ''}</div>
+        </div>
+      </a>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="alert error">${e.message}</div>`;
+  }
+}
+
+document.getElementById('search-btn').addEventListener('click', loadRestaurants);
+document.getElementById('search').addEventListener('keydown', e => { if (e.key === 'Enter') loadRestaurants(); });
+loadRestaurants();
+</script>
+</body>
+</html>
