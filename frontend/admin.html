@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Панель администратора</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Шапка (идентична profile.html и manager.html) -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">🍽 RestBook</div>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="restaurants.html">Рестораны</a>
+      <span id="user-links">
+        <a href="profile.html">Личный кабинет</a>
+        <a id="manager-link" href="manager.html" class="hidden">Панель менеджера</a>
+        <a id="admin-link" href="admin.html" class="hidden">Панель администратора</a>
+        <span class="user-info" id="user-name"></span>
+        <a href="#" id="logout-btn">Выйти</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Панель администратора</h1>
+  
+  <!-- Блок для вывода ошибки, если зашел не админ -->
+  <div id="access-msg"></div>
+
+  <!-- Блок статистики (заполняется через JS) -->
+  <div class="stats" id="stats"></div>
+
+  <!-- Вкладки -->
+  <div class="profile-tabs">
+    <button class="tab-btn active" data-tab="bookings">Брони</button>
+    <button class="tab-btn" data-tab="users">Пользователи</button>
+  </div>
+
+  <!-- ================= ВКЛАДКА: БРОНИ ================= -->
+  <section class="tab-panel" id="panel-bookings">
+    <div class="filters">
+      <input type="text" id="b-q" placeholder="Поиск: имя, email, ресторан" style="flex:1; min-width:200px;">
+      <select id="b-status">
+        <option value="">Все статусы</option>
+        <option value="pending">Ожидает</option>
+        <option value="confirmed">Подтверждена</option>
+        <option value="cancelled">Отменена</option>
+      </select>
+      <input type="date" id="b-date">
+      <select id="b-per">
+        <option value="10">10 / стр.</option>
+        <option value="20">20 / стр.</option>
+        <option value="50">50 / стр.</option>
+      </select>
+      <button class="btn" id="b-search">Применить</button>
+    </div>
+    
+    <!-- Таблица броней рендерится сюда -->
+    <div id="bookings-box"></div>
+    <!-- Пагинатор -->
+    <div id="bookings-pager" class="filters" style="justify-content:center;"></div>
+  </section>
+
+  <!-- ================= ВКЛАДКА: ПОЛЬЗОВАТЕЛИ ================= -->
+  <section class="tab-panel hidden" id="panel-users">
+    <div class="filters">
+      <input type="text" id="u-q" placeholder="Поиск: логин, ФИО, email" style="flex:1; min-width:200px;">
+      <select id="u-role">
+        <option value="">Все роли</option>
+        <option value="user">user</option>
+        <option value="manager">manager</option>
+        <option value="admin">admin</option>
+      </select>
+      <select id="u-per">
+        <option value="10">10 / стр.</option>
+        <option value="20">20 / стр.</option>
+        <option value="50">50 / стр.</option>
+      </select>
+      <button class="btn" id="u-search">Применить</button>
+    </div>
+    
+    <!-- Таблица пользователей рендерится сюда -->
+    <div id="users-box"></div>
+    <!-- Пагинатор -->
+    <div id="users-pager" class="filters" style="justify-content:center;"></div>
+  </section>
+</main>
+
+<!-- ================= МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ================= -->
+<div id="edit-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Редактировать бронь</h2>
+    <div id="edit-msg"></div>
+    <form id="edit-form">
+      <input type="hidden" name="booking_id">
+      
+      <div class="form-group">
+        <label>Дата</label>
+        <input type="date" name="booking_date" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Время</label>
+        <input type="time" name="booking_time" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Количество гостей</label>
+        <input type="number" name="guests" min="1" max="20" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Статус</label>
+        <select name="status" required>
+          <option value="pending">Ожидает (pending)</option>
+          <option value="confirmed">Подтверждена (confirmed)</option>
+          <option value="cancelled">Отменена (cancelled)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Комментарий</label>
+        <textarea name="comment" rows="2"></textarea>
+      </div>
+      
+      <div class="filters">
+        <button class="btn" type="submit">Сохранить</button>
+        <button class="btn" type="button" id="edit-cancel">Отмена</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Подключение скриптов -->
+<script src="js/escape.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

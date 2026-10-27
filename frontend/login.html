@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Вход</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">🍽 RestBook</div>
+    <nav class="nav">
+      <a href="index.html">Главная</a>
+      <a href="restaurants.html">Рестораны</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container" style="max-width:420px;">
+  <div class="card">
+    <h1>Вход</h1>
+
+    <!-- Блок для показа ошибок -->
+    <div id="msg"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label>Логин</label>
+        <input type="text" name="login" required>
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" name="password" required>
+      </div>
+      <button class="btn" type="submit" style="width:100%;">Войти</button>
+    </form>
+
+    <p style="margin-top:14px;font-size:14px;">
+      Еще не зарегистрированы? <a href="register.html">Регистрация</a>
+    </p>
+  </div>
+</main>
+
+<script src="js/api.js"></script>
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('msg');
+  msg.innerHTML = '';
+  const fd = new FormData(e.target);
+  
+  try {
+    // Отправляем запрос на сервер
+    const res = await api.login({
+      login:    fd.get('login'),
+      password: fd.get('password'),
+    });
+    
+    // Если сервер ответил, проверяем роль
+    if (res && res.user) {
+      // Если это Админ — кидаем на админку, иначе — в профиль
+      if (res.user.role === 'admin') {
+        location.href = 'admin.html';
+      } else {
+        location.href = 'profile.html';
+      }
+    } else {
+      // Если пользователь не пришел в ответе
+      location.href = 'profile.html';
+    }
+  } catch (err) {
+    msg.innerHTML = `<div class="alert error">${err.message}</div>`;
+  }
+});
+</script>
+</body>
+</html>
