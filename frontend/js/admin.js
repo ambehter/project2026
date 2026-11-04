@@ -46,7 +46,7 @@
   }
 
   /* =========================================================
-   * ОБЩИЕ ФУНКЦИИ (СОРТИРОВКА И ПАГИНАЦИЯ)
+   * ОБЩИЕ ФУНКЦИИ (СОРТИРОВКА, ПАГИНАЦИЯ, ВИРТУАЛЬНЫЙ СКРОЛЛ)
    * ========================================================= */
   function bindSorting(container, state, reload) {
     container.querySelectorAll('th[data-sort]').forEach(th => {
@@ -59,7 +59,7 @@
           state.sort = key;
           state.dir = 'asc';
         }
-        state.page = 1; // при смене сортировки сбрасываем на 1 страницу
+        state.page = 1;
         reload();
       });
     });
@@ -84,17 +84,46 @@
     el.querySelectorAll('button[data-p]').forEach(b => {
       b.addEventListener('click', () => {
         const p = parseInt(b.dataset.p, 10);
-        if (p >= 1 && p <= pages) {
-          onGo(p);
-        }
+        if (p >= 1 && p <= pages) onGo(p);
       });
     });
+  }
+
+  // ВИРТУАЛЬНЫЙ СКРОЛЛ ДЛЯ БРОНЕЙ
+  // (Рендерит только видимые строки в tbody, а не всю таблицу целиком)
+  function renderVirtualTable(tbody, items, rowHeight, buildRowHtml, bindRowActions) {
+    const visibleCount = Math.ceil(600 / rowHeight) + 4; // ~30 строк
+    let start = 0;
+
+    function draw() {
+      const end = Math.min(items.length, start + visibleCount);
+      // Создаем "прокладку" сверху, которая имитирует высоту невидимых строк
+      tbody.innerHTML = `
+        <tr style="height:${start * rowHeight}px;"><td colspan="8" style="padding:0; border:none;"></td></tr>
+        ${items.slice(start, end).map(buildRowHtml).join('')}
+        <tr style="height:${(items.length - end) * rowHeight}px;"><td colspan="8" style="padding:0; border:none;"></td></tr>
+      `;
+      // Перепривязываем обработчики к новым кнопкам
+      bindRowActions(tbody);
+    }
+
+    // Вешаем обработчик на скролл-контейнер
+    tbody.parentElement.parentElement.onscroll = (e) => {
+      const newStart = Math.floor(e.target.scrollTop / rowHeight);
+      if (newStart !== start && newStart >= 0) {
+        start = newStart;
+        draw();
+      }
+    };
+    
+    // Первичная отрисовка
+    draw();
   }
 
   /* =========================================================
    * БРОНИ
    * ========================================================= */
-  let bState = { page: 1, per_page: 10, sort: 'id', dir: 'desc' };
+  let bState = { page: 1, per_page: 50, sort: 'id', dir: 'desc' }; // Увеличили per_page, чтобы было что скроллить
 
   async function loadBookings() {
     const box   = document.getElementById('bookings-box');
@@ -120,81 +149,87 @@
         return;
       }
       
+      // Оборачиваем таблицу в контейнер с фиксированной высотой для скролла
       box.innerHTML = `
-        <table>
-          <thead><tr>
-            <th data-sort="id">ID</th>
-            <th>Клиент</th>
-            <th>Ресторан</th>
-            <th data-sort="booking_date">Дата/время</th>
-            <th>Столик</th>
-            <th data-sort="guests">Гостей</th>
-            <th data-sort="status">Статус</th>
-            <th>Действия</th>
-          </tr></thead>
-          <tbody>
-          ${items.map(b => `
-            <tr>
-              <td>${b.id}</td>
-              <td>
-                ${escapeHtml(b.user_name)}<br>
-                <span class="meta" style="font-size:0.8rem;color:#666">${escapeHtml(b.user_email)}</span>
-              </td>
-              <td>${escapeHtml(b.restaurant_name)}</td>
-              <td>${escapeHtml(b.booking_date)}<br>${escapeHtml(b.booking_time)}</td>
-              <td>№${escapeHtml(b.table_number)} (${escapeHtml(b.hall_name)})</td>
-              <td>${b.guests}</td>
-              <td><span class="badge ${b.status}">${statusRu(b.status)}</span></td>
-              <td style="white-space:nowrap;">
-                ${b.status !== 'confirmed' ? `<button class="btn btn-rb-sm" data-act="confirm" data-id="${b.id}" title="Подтвердить">✓</button>` : ''}
-                ${b.status !== 'pending'   ? `<button class="btn btn-rb-sm" data-act="pending" data-id="${b.id}" title="Вернуть в ожидание">⟳</button>` : ''}
-                <button class="btn btn-rb-sm" data-act="edit" data-id="${b.id}"
-                        data-date="${escapeHtml(b.booking_date)}"
-                        data-time="${escapeHtml(b.booking_time)}"
-                        data-guests="${b.guests}"
-                        data-status="${b.status}"
-                        data-comment="${escapeHtml(b.comment || '')}">✎</button>
-                <button class="btn danger btn-rb-sm" data-act="delete" data-id="${b.id}" title="Удалить">✕</button>
-              </td>
-            </tr>
-          `).join('')}
-          </tbody>
-        </table>
+        <div style="max-height: 600px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+          <table style="margin: 0;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+              <tr>
+                <th data-sort="id">ID</th>
+                <th>Клиент</th>
+                <th>Ресторан</th>
+                <th data-sort="booking_date">Дата/время</th>
+                <th>Столик</th>
+                <th data-sort="guests">Гостей</th>
+                <th data-sort="status">Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-tbody"></tbody>
+          </table>
+        </div>
       `;
+      
+      const tbody = document.getElementById('bookings-tbody');
+      
+      // Функция рендера одной строки
+      const buildRowHtml = (b) => `
+        <tr>
+          <td>${b.id}</td>
+          <td>${escapeHtml(b.user_name)}<br><span class="meta" style="font-size:0.8rem;color:#666">${escapeHtml(b.user_email)}</span></td>
+          <td>${escapeHtml(b.restaurant_name)}</td>
+          <td>${escapeHtml(b.booking_date)}<br>${escapeHtml(b.booking_time)}</td>
+          <td>№${escapeHtml(b.table_number)} (${escapeHtml(b.hall_name)})</td>
+          <td>${b.guests}</td>
+          <td><span class="badge ${b.status}">${statusRu(b.status)}</span></td>
+          <td style="white-space:nowrap;">
+            ${b.status !== 'confirmed' ? `<button class="btn btn-rb-sm" data-act="confirm" data-id="${b.id}" title="Подтвердить">✓</button>` : ''}
+            ${b.status !== 'pending'   ? `<button class="btn btn-rb-sm" data-act="pending" data-id="${b.id}" title="Вернуть в ожидание">⟳</button>` : ''}
+            <button class="btn btn-rb-sm" data-act="edit" data-id="${b.id}"
+                    data-date="${escapeHtml(b.booking_date)}" data-time="${escapeHtml(b.booking_time)}"
+                    data-guests="${b.guests}" data-status="${b.status}" data-comment="${escapeHtml(b.comment || '')}">✎</button>
+            <button class="btn danger btn-rb-sm" data-act="delete" data-id="${b.id}" title="Удалить">✕</button>
+          </td>
+        </tr>
+      `;
+
+      // Функция привязки событий к кнопкам
+      const bindRowActions = (container) => {
+        container.querySelectorAll('button[data-act]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = parseInt(btn.dataset.id, 10);
+            const act = btn.dataset.act;
+            try {
+              if (act === 'confirm' || act === 'pending') {
+                await api.adminUpdateBookingStatus(id, act === 'confirm' ? 'confirmed' : 'pending');
+                loadBookings(); loadStats();
+              }
+              if (act === 'delete') {
+                if (!confirm('Удалить бронь #' + id + '?')) return;
+                await api.adminDeleteBooking(id);
+                loadBookings(); loadStats();
+              }
+              if (act === 'edit') {
+                document.querySelector('#edit-form [name=booking_id]').value = id;
+                document.querySelector('#edit-form [name=booking_date]').value = btn.dataset.date;
+                document.querySelector('#edit-form [name=booking_time]').value = btn.dataset.time.slice(0,5);
+                document.querySelector('#edit-form [name=guests]').value = btn.dataset.guests;
+                document.querySelector('#edit-form [name=status]').value = btn.dataset.status;
+                document.querySelector('#edit-form [name=comment]').value = btn.dataset.comment;
+                document.getElementById('edit-msg').innerHTML = '';
+                document.getElementById('edit-modal').classList.remove('hidden');
+              }
+            } catch (e) { alert(e.message); }
+          });
+        });
+      };
+
+      // Запуск виртуального скролла
+      renderVirtualTable(tbody, items, 50, buildRowHtml, bindRowActions);
       
       bindSorting(box, bState, loadBookings);
       renderPager(pager, data.page, data.pages, p => { bState.page = p; loadBookings(); });
 
-      // Обработчики кнопок в таблице
-      box.querySelectorAll('button[data-act]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const id = parseInt(btn.dataset.id, 10);
-          const act = btn.dataset.act;
-          try {
-            if (act === 'confirm' || act === 'pending') {
-              await api.adminUpdateBookingStatus(id, act === 'confirm' ? 'confirmed' : 'pending');
-              loadBookings(); loadStats();
-            }
-            if (act === 'delete') {
-              if (!confirm('Удалить бронь #' + id + '?')) return;
-              await api.adminDeleteBooking(id);
-              loadBookings(); loadStats();
-            }
-            if (act === 'edit') {
-              document.querySelector('#edit-form [name=booking_id]').value = id;
-              document.querySelector('#edit-form [name=booking_date]').value = btn.dataset.date;
-              document.querySelector('#edit-form [name=booking_time]').value = btn.dataset.time.slice(0,5);
-              document.querySelector('#edit-form [name=guests]').value = btn.dataset.guests;
-              document.querySelector('#edit-form [name=status]').value = btn.dataset.status;
-              document.querySelector('#edit-form [name=comment]').value = btn.dataset.comment;
-              document.getElementById('edit-msg').innerHTML = '';
-              document.getElementById('edit-modal').classList.remove('hidden');
-            }
-          } catch (e) {
-            alert(e.message);
-          }
-        });
-      });
     } catch (e) {
       box.innerHTML = `<div class="alert error">${escapeHtml(e.message)}</div>`;
     }
@@ -231,22 +266,16 @@
   });
 
   // Фильтры броней
-  document.getElementById('b-search').addEventListener('click', () => {
-    bState.page = 1; loadBookings();
-  });
-  document.getElementById('b-status').addEventListener('change', () => {
-    bState.page = 1; loadBookings();
-  });
-  document.getElementById('b-date').addEventListener('change', () => {
-    bState.page = 1; loadBookings();
-  });
+  document.getElementById('b-search').addEventListener('click', () => { bState.page = 1; loadBookings(); });
+  document.getElementById('b-status').addEventListener('change', () => { bState.page = 1; loadBookings(); });
+  document.getElementById('b-date').addEventListener('change', () => { bState.page = 1; loadBookings(); });
   document.getElementById('b-per').addEventListener('change', (e) => {
     bState.per_page = parseInt(e.target.value, 10);
     bState.page = 1; loadBookings();
   });
 
   /* =========================================================
-   * ПОЛЬЗОВАТЕЛИ
+   * ПОЛЬЗОВАТЕЛИ (Оставляем как было, тут виртуализация не нужна)
    * ========================================================= */
   let uState = { page: 1, per_page: 10, sort: 'id', dir: 'desc' };
 
@@ -320,7 +349,6 @@
       bindSorting(box, uState, loadUsers);
       renderPager(pager, data.page, data.pages, p => { uState.page = p; loadUsers(); });
 
-      // Инлайн-смена роли
       box.querySelectorAll('select[data-act=role]').forEach(sel => {
         sel.addEventListener('change', async () => {
           try {
@@ -328,12 +356,11 @@
             loadStats();
           } catch (e) {
             alert(e.message);
-            loadUsers(); // откатить визуально, если ошибка
+            loadUsers();
           }
         });
       });
       
-      // Блокировка и удаление
       box.querySelectorAll('button[data-act]').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = parseInt(btn.dataset.id, 10);
@@ -357,13 +384,8 @@
     }
   }
 
-  // Фильтры пользователей
-  document.getElementById('u-search').addEventListener('click', () => {
-    uState.page = 1; loadUsers();
-  });
-  document.getElementById('u-role').addEventListener('change', () => {
-    uState.page = 1; loadUsers();
-  });
+  document.getElementById('u-search').addEventListener('click', () => { uState.page = 1; loadUsers(); });
+  document.getElementById('u-role').addEventListener('change', () => { uState.page = 1; loadUsers(); });
   document.getElementById('u-per').addEventListener('change', (e) => {
     uState.per_page = parseInt(e.target.value, 10);
     uState.page = 1; loadUsers();

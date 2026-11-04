@@ -43,6 +43,32 @@
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script>
+// --- ЛОГИКА ЛЕНИВОЙ ЗАГРУЗКИ (IntersectionObserver) ---
+let imageObserver = null;
+
+function initLazyLoading() {
+  // Если браузер не поддерживает Observer — грузим всё сразу
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      if (img.dataset.src) img.src = img.dataset.src;
+    });
+    return;
+  }
+
+  // Создаем Observer (один раз), который следит за картинками с отступом 200px
+  if (!imageObserver) {
+    imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const img = entry.target;
+        if (img.dataset.src) img.src = img.dataset.src;
+        img.classList.add('is-loaded');
+        imageObserver.unobserve(img); // Как загрузили — забыли про нее
+      });
+    }, { rootMargin: '200px 0px', threshold: 0.01 });
+  }
+}
+
 async function loadRestaurants() {
   const list = document.getElementById('list');
   const empty = document.getElementById('empty');
@@ -62,11 +88,15 @@ async function loadRestaurants() {
       return;
     }
     empty.classList.add('hidden');
+    
+    // Рендерим карточки с SVG-заглушкой и data-src
     list.innerHTML = items.map(r => `
       <a class="restaurant-card" href="restaurant-detail.html?id=${r.id}">
-        <img src="${escapeHtml(getRestaurantImage(r.name))}"
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 320'%3E%3Crect width='520' height='320' fill='%23eee'/%3E%3C/svg%3E"
+             data-src="${escapeHtml(getRestaurantImage(r.name))}"
              alt="${escapeHtml(r.name)}"
-             loading="lazy"
+             width="520" height="320"
+             class="lazy-img"
              onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE}';">
         <div class="restaurant-card-body">
           <h3>${escapeHtml(r.name)}</h3>
@@ -76,9 +106,25 @@ async function loadRestaurants() {
         </div>
       </a>
     `).join('');
+
+    // Включаем отслеживание для новых картинок
+    initLazyLoading();
+    list.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
+
   } catch (e) {
     list.innerHTML = `<div class="alert error">${escapeHtml(e.message)}</div>`;
   }
+}
+
+function renderSkeleton(container, count = 6) {
+  container.innerHTML = Array.from({ length: count }).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line" style="width: 70%"></div>
+      <div class="skeleton-line" style="width: 40%"></div>
+      <div class="skeleton-line" style="width: 55%"></div>
+    </div>
+  `).join('');
 }
 
 document.getElementById('search-btn').addEventListener('click', loadRestaurants);

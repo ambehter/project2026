@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<!-- Навигация Bootstrap -->
+<!-- НАВИГАЦИЯ (ВОЗВРАЩЕНА) -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
     <a class="navbar-brand" href="index.html">🍽 RestBook</a>
@@ -27,13 +27,99 @@
 <main class="container py-5">
   <h1>Найдите идеальный ресторан</h1>
   <p class="lead">Бронируйте столики онлайн в лучших ресторанах вашего города.</p>
-  <a href="restaurants.html" class="btn btn-primary btn-lg">Смотреть рестораны →</a>
-  <a href="restaurants-react.html" class="btn btn-outline-secondary btn-lg ms-2">React-версия</a>
+
+  <!-- ===== СЛАЙДЕР ===== -->
+  <section class="rb-slider mb-5" id="rb-slider" aria-roledescription="carousel">
+    <div class="rb-slider__track" id="rb-slider-track">
+      
+      <!-- Слайд 1 - Пушкинъ -->
+      <div class="rb-slider__slide">
+        <picture>
+          <source type="image/avif" 
+                  srcset="images/avif/pushkin-400.avif 400w, images/avif/pushkin-800.avif 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <source type="image/webp" 
+                  srcset="images/webp/pushkin-400.webp 400w, images/webp/pushkin-800.webp 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <img src="images/slides/pushkin-800.jpg" 
+               srcset="images/slides/pushkin-400.jpg 400w, images/slides/pushkin-800.jpg 800w" 
+               sizes="(max-width:768px) 100vw, 1200px"
+               width="800" height="450" alt="Ресторан Пушкинъ" loading="eager">
+        </picture>
+        <div class="rb-slider__caption">Пушкинъ — русская кухня</div>
+      </div>
+
+      <!-- Слайд 2 - White Rabbit -->
+      <div class="rb-slider__slide">
+        <picture>
+          <source type="image/avif" 
+                  srcset="images/avif/white-rabbit-400.avif 400w, images/avif/white-rabbit-800.avif 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <source type="image/webp" 
+                  srcset="images/webp/white-rabbit-400.webp 400w, images/webp/white-rabbit-800.webp 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <img src="images/slides/white-rabbit-800.jpg" 
+               srcset="images/slides/white-rabbit-400.jpg 400w, images/slides/white-rabbit-800.jpg 800w" 
+               sizes="(max-width:768px) 100vw, 1200px"
+               width="800" height="450" alt="Ресторан White Rabbit" loading="lazy">
+        </picture>
+        <div class="rb-slider__caption">White Rabbit — авторская кухня</div>
+      </div>
+
+      <!-- Слайд 3 - Nobu -->
+      <div class="rb-slider__slide">
+        <picture>
+          <source type="image/avif" 
+                  srcset="images/avif/nobu-400.avif 400w, images/avif/nobu-800.avif 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <source type="image/webp" 
+                  srcset="images/webp/nobu-400.webp 400w, images/webp/nobu-800.webp 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <img src="images/slides/nobu-800.jpg" 
+               srcset="images/slides/nobu-400.jpg 400w, images/slides/nobu-800.jpg 800w" 
+               sizes="(max-width:768px) 100vw, 1200px"
+               width="800" height="450" alt="Ресторан Nobu" loading="lazy">
+        </picture>
+        <div class="rb-slider__caption">Nobu — японская кухня</div>
+      </div>
+
+      <!-- Слайд 4 - Турандот -->
+      <div class="rb-slider__slide">
+        <picture>
+          <source type="image/avif" 
+                  srcset="images/avif/turandot-400.avif 400w, images/avif/turandot-800.avif 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <source type="image/webp" 
+                  srcset="images/webp/turandot-400.webp 400w, images/webp/turandot-800.webp 800w" 
+                  sizes="(max-width:768px) 100vw, 1200px">
+          <img src="images/slides/turandot-800.jpg" 
+               srcset="images/slides/turandot-400.jpg 400w, images/slides/turandot-800.jpg 800w" 
+               sizes="(max-width:768px) 100vw, 1200px"
+               width="800" height="450" alt="Ресторан Турандот" loading="lazy">
+        </picture>
+        <div class="rb-slider__caption">Турандот — китайская кухня</div>
+      </div>
+
+    </div>
+    
+    <div class="rb-slider__dots" id="rb-slider-dots"></div>
+    <button class="rb-slider__nav rb-slider__nav--prev" id="rb-prev" aria-label="Назад">‹</button>
+    <button class="rb-slider__nav rb-slider__nav--next" id="rb-next" aria-label="Вперед">›</button>
+  </section>
+  <!-- ===== /СЛАЙДЕР ===== -->
+
+  <!-- Кнопки возвращены под слайдер -->
+  <div class="d-flex gap-2">
+    <a href="restaurants.html" class="btn btn-primary btn-lg">Смотреть рестораны →</a>
+    <a href="restaurants-react.html" class="btn btn-outline-secondary btn-lg">React-версия</a>
+  </div>
 </main>
 
 <!-- Bootstrap JS (для модалок, dropdown) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+<!-- Подключение скрипта слайдера -->
+<script src="js/slider.js" defer></script>
 </body>
 </html>

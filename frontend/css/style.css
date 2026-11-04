@@ -548,3 +548,128 @@ table tr:hover td {
   opacity: 0.4;
   cursor: not-allowed;
 }
+/* стили слайдеров */
+.rb-slider {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--rb-radius);
+  box-shadow: var(--rb-shadow);
+  background: #eee;
+  margin: 1.5rem 0;
+  aspect-ratio: 16 / 9;      /* резерв высоты — нет CLS */
+}
+
+.rb-slider__track {
+  display: flex;
+  height: 100%;
+  transition: transform .5s ease;
+  will-change: transform;
+}
+
+.rb-slider__slide {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+.rb-slider__slide picture,
+.rb-slider__slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rb-slider__caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: .8rem 1rem;
+  color: #fff;
+  font-weight: 600;
+  background: linear-gradient(transparent, rgba(0,0,0,.65));
+}
+
+.rb-slider__dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.55);
+  cursor: pointer;
+  padding: 0;
+  transition: background .2s, transform .2s;
+}
+
+.rb-slider__dot[aria-selected="true"] {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+@media (max-width: 480px) {
+  .rb-slider { aspect-ratio: 4 / 3; }
+  .rb-slider__nav { width: 32px; height: 32px; font-size: 1.1rem; }
+  .rb-slider__dot { width: 12px; height: 12px; }
+}
+/* --- Стили для кнопок-стрелок слайдера --- */
+.rb-slider__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px; 
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.rb-slider__nav:hover { 
+  background: rgba(0,0,0,.55); 
+}
+
+.rb-slider__nav--prev { 
+  left: .6rem; 
+}
+
+.rb-slider__nav--next { 
+  right: .6rem; 
+}
+/* Плавное появление картинок при ленивой загрузке */
+.lazy-img {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background-color: #eee;
+}
+
+.lazy-img.is-loaded {
+  opacity: 1;
+}
+/* ============================================================
+   МОБИЛЬНАЯ ВЕРСИЯ 390×844 (iPhone 12/13/14)
+   ============================================================ */
+@media (max-width: 480px) {
+  .container { padding: 0 .9rem; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+
+  .rb-slider { aspect-ratio: 4 / 3; }          
+  .rb-slider__caption { font-size: .85rem; padding: .6rem .8rem; }
+  .rb-slider__nav { width: 32px; height: 32px; font-size: 1.1rem; } 
+  .rb-slider__nav--prev { left: .35rem; }
+  .rb-slider__nav--next { right: .35rem; }
+  .rb-slider__dot { width: 12px; height: 12px; } 
+
+  .filters { flex-direction: column; }
+  .filters input,
+  .filters select,
+  .filters button { width: 100%; }
+
+  .modal-content { max-width: 100%; padding: 1.2rem; margin: 0 .8rem; }
+  .btn-lg { width: 100%; }
+}

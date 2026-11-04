@@ -22,15 +22,39 @@ async function fetchCsrfToken() {
   }
 }
 
+// ==========================================
+// ЛОГИКА КЭШИРОВАНИЯ (Stale-while-revalidate)
+// ==========================================
+const apiCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 минут
+
 async function apiFetch(path, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
+  const key = path + '|' + method + '|' + JSON.stringify(options.body || '');
+  const now = Date.now();
+  const cached = apiCache.get(key);
+
+  // 1. Проверка кэша (только для GET-запросов)
+  if (method === 'GET' && cached && (now - cached.time < CACHE_TTL)) {
+    // Отдаем закэшированные данные сразу, а в фоне обновляем их
+    fetch(API_BASE + path, { credentials: 'include' })
+      .then(res => res.json())
+      .then(payload => {
+        if (payload && payload.data) {
+          apiCache.set(key, { data: payload.data, time: Date.now() });
+        }
+      }).catch(() => {});
+    
+    return cached.data;
+  }
+
+  // 2. Подготовка заголовков и CSRF
   const opts = {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     ...options,
   };
 
-  // Добавляем CSRF-токен для опасных методов
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
     if (!csrfToken) {
       await fetchCsrfToken();
@@ -44,6 +68,7 @@ async function apiFetch(path, options = {}) {
     opts.body = JSON.stringify(opts.body);
   }
 
+  // 3. Выполнение реального запроса
   const res = await fetch(API_BASE + path, opts);
   let payload = null;
   try { payload = await res.json(); } catch (e) { /* ignore */ }
@@ -54,6 +79,12 @@ async function apiFetch(path, options = {}) {
     err.status = res.status;
     throw err;
   }
+
+  // 4. Сохранение в кэш (только GET)
+  if (method === 'GET' && payload && payload.data) {
+    apiCache.set(key, { data: payload.data, time: now });
+  }
+
   return payload ? payload.data : null;
 }
 
