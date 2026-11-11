@@ -9,9 +9,18 @@
     try {
       const data = await api.restaurant(restaurantId);
       const r = data.restaurant;
+      
+      // 1. Ищем картинку локально по названию через getRestaurantImage (из images.js)
+      // Если локальной нет, берем из базы (r.image_url), если нет и её — ставим заглушку.
+      const localImg = typeof getRestaurantImage === 'function' ? getRestaurantImage(r.name) : null;
+      const fallbackImg = 'images/placeholder.jpg';
+      const imgUrl = localImg || r.image_url || fallbackImg;
+
+      // 2. Отрисовываем с защитой от битых ссылок (onerror)
       box.innerHTML = `
         <div style="display:flex;gap:20px;flex-wrap:wrap;">
-          <img src="${r.image_url || 'https://via.placeholder.com/400x250'}"
+          <img src="${imgUrl}"
+               onerror="this.onerror=null; this.src='${fallbackImg}';"
                style="width:340px;height:220px;object-fit:cover;border-radius:12px;">
           <div style="flex:1;min-width:220px;">
             <h1>${r.name}</h1>
