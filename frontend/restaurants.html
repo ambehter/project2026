@@ -43,12 +43,12 @@
 <script src="js/images.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+
 <script>
-// --- ЛОГИКА ЛЕНИВОЙ ЗАГРУЗКИ (IntersectionObserver) ---
+// --- ЛОГИКА ЛЕНИВОЙ ЗАГРУЗКИ ---
 let imageObserver = null;
 
 function initLazyLoading() {
-  // Если браузер не поддерживает Observer — грузим всё сразу
   if (!('IntersectionObserver' in window)) {
     document.querySelectorAll('img[data-src]').forEach(img => {
       if (img.dataset.src) img.src = img.dataset.src;
@@ -56,7 +56,6 @@ function initLazyLoading() {
     return;
   }
 
-  // Создаем Observer (один раз), который следит за картинками с отступом 200px
   if (!imageObserver) {
     imageObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -64,12 +63,25 @@ function initLazyLoading() {
         const img = entry.target;
         if (img.dataset.src) img.src = img.dataset.src;
         img.classList.add('is-loaded');
-        imageObserver.unobserve(img); // Как загрузили — забыли про нее
+        imageObserver.unobserve(img);
       });
     }, { rootMargin: '200px 0px', threshold: 0.01 });
   }
 }
 
+// --- СКЕЛЕТОН ---
+function renderSkeleton(container, count = 6) {
+  container.innerHTML = Array.from({ length: count }).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line" style="width: 70%"></div>
+      <div class="skeleton-line" style="width: 40%"></div>
+      <div class="skeleton-line" style="width: 55%"></div>
+    </div>
+  `).join('');
+}
+
+// --- ЗАГРУЗКА РЕСТОРАНОВ ---
 async function loadRestaurants() {
   const list = document.getElementById('list');
   const empty = document.getElementById('empty');
@@ -79,10 +91,13 @@ async function loadRestaurants() {
   if (s) params.search = s;
   if (c) params.cuisine = c;
 
+  // Показываем скелетоны
   renderSkeleton(list, 6);
+  
   try {
     const data = await api.restaurants(params);
     const items = data.items || [];
+    
     if (!items.length) {
       list.innerHTML = '';
       empty.classList.remove('hidden');
@@ -90,13 +105,13 @@ async function loadRestaurants() {
     }
     empty.classList.add('hidden');
     
-    // Рендерим карточки с SVG-заглушкой и data-src
-   list.innerHTML = items.map((r, i) => `
-  <a class="restaurant-card" 
-     data-aos="fade-up" 
-     data-aos-delay="${i * 60}" 
-     href="restaurant-detail.html?id=${r.id}">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 320'%3E%3Crect width='520' height='320' fill='%23eee'/%3E%3C/svg%3E"
+    // Рендерим карточки
+    list.innerHTML = items.map((r, i) => `
+      <a class="restaurant-card" 
+         data-aos="fade-up" 
+         data-aos-delay="${i * 60}" 
+         href="restaurant-detail.html?id=${r.id}">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 320'%3E%3Crect width='520' height='320' fill='%23eee'/%3E%3C/svg%3E"
              data-src="${escapeHtml(getRestaurantImage(r.name))}"
              alt="${escapeHtml(r.name)}"
              width="520" height="320"
@@ -111,40 +126,15 @@ async function loadRestaurants() {
       </a>
     `).join('');
 
-    // Включаем отслеживание для новых картинок
+    // Включаем ленивую загрузку картинок
     initLazyLoading();
     list.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
 
-if (window.AOS) AOS.refresh();
+    // Обновляем AOS, чтобы карточки появились с анимацией
+    if (window.AOS) AOS.refresh();
 
   } catch (e) {
     list.innerHTML = `<div class="alert error">${escapeHtml(e.message)}</div>`;
-  }
-}
-
-function renderSkeleton(container, count = 6) {
-  container.innerHTML = Array.from({ length: count }).map(() => `
-    <div class="skeleton-card">
-      <div class="skeleton-img"></div>
-      <div class="skeleton-line" style="width: 70%"></div>
-      <div class="skeleton-line" style="width: 40%"></div>
-      <div class="skeleton-line" style="width: 55%"></div>
-    </div>
-  `).join('');
-}
-
-// Пример использования в функции загрузки:
-async function loadRestaurants() {
-  const list = document.getElementById('list');
-  
-  // 1. Показываем скелетоны, пока идет запрос
-  renderSkeleton(list, 6); 
-  
-  try {
-    const data = await api.restaurants(params);
-    // ... рендерим реальные карточки ...
-  } catch (e) {
-    // ...
   }
 }
 
@@ -152,10 +142,16 @@ document.getElementById('search-btn').addEventListener('click', loadRestaurants)
 document.getElementById('search').addEventListener('keydown', e => { if (e.key === 'Enter') loadRestaurants(); });
 loadRestaurants();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+<!-- Скрипты в самом конце и с атрибутом defer -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 <script>
-  AOS.init({ duration: 600, once: true, offset: 80 });
+  document.addEventListener('DOMContentLoaded', () => {
+    AOS.init({ duration: 600, once: true, offset: 80 });
+  });
 </script>
+
 <!-- в конце body, после всех скриптов -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
