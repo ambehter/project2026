@@ -1,6 +1,6 @@
 (function () {
   const slider = document.getElementById('rb-slider');
-  if (!slider) return;
+  if (!slider) return; // Если слайдера нет на странице — выходим
 
   const track = document.getElementById('rb-slider-track');
   const slides = Array.from(track.children);
@@ -8,10 +8,10 @@
   const prevBtn = document.getElementById('rb-prev');
   const nextBtn = document.getElementById('rb-next');
 
-  const AUTOPLAY_MS = 3000;
+  const AUTOPLAY_MS = 3000; // 3 секунды
   let index = 0;
   let timer = null;
-  let isPaused = false;
+  let isPaused = false; // Флаг паузы
 
   // 1. Создаем точки-индикаторы
   slides.forEach((_, i) => {
@@ -44,6 +44,7 @@
   function startAutoplay() {
     stopAutoplay();
     timer = setInterval(() => {
+      // Если не на паузе и вкладка браузера активна — листаем
       if (!isPaused && !document.hidden) next();
     }, AUTOPLAY_MS);
   }
@@ -56,7 +57,7 @@
     startAutoplay();
   }
 
-  // 5. Обработчики кликов по стрелкам (ВОТ ИХ НЕ ХВАТАЛО)
+  // 5. Обработчики кликов по стрелкам
   prevBtn.addEventListener('click', () => { prev(); restartAutoplay(); });
   nextBtn.addEventListener('click', () => { next(); restartAutoplay(); });
 

@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Рестораны</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
 </head>
 <body>
 <header class="header">
@@ -78,7 +79,7 @@ async function loadRestaurants() {
   if (s) params.search = s;
   if (c) params.cuisine = c;
 
-  list.innerHTML = '<div class="empty-state">Загрузка...</div>';
+  renderSkeleton(list, 6);
   try {
     const data = await api.restaurants(params);
     const items = data.items || [];
@@ -90,9 +91,12 @@ async function loadRestaurants() {
     empty.classList.add('hidden');
     
     // Рендерим карточки с SVG-заглушкой и data-src
-    list.innerHTML = items.map(r => `
-      <a class="restaurant-card" href="restaurant-detail.html?id=${r.id}">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 320'%3E%3Crect width='520' height='320' fill='%23eee'/%3E%3C/svg%3E"
+   list.innerHTML = items.map((r, i) => `
+  <a class="restaurant-card" 
+     data-aos="fade-up" 
+     data-aos-delay="${i * 60}" 
+     href="restaurant-detail.html?id=${r.id}">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 320'%3E%3Crect width='520' height='320' fill='%23eee'/%3E%3C/svg%3E"
              data-src="${escapeHtml(getRestaurantImage(r.name))}"
              alt="${escapeHtml(r.name)}"
              width="520" height="320"
@@ -111,6 +115,8 @@ async function loadRestaurants() {
     initLazyLoading();
     list.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
 
+if (window.AOS) AOS.refresh();
+
   } catch (e) {
     list.innerHTML = `<div class="alert error">${escapeHtml(e.message)}</div>`;
   }
@@ -127,9 +133,31 @@ function renderSkeleton(container, count = 6) {
   `).join('');
 }
 
+// Пример использования в функции загрузки:
+async function loadRestaurants() {
+  const list = document.getElementById('list');
+  
+  // 1. Показываем скелетоны, пока идет запрос
+  renderSkeleton(list, 6); 
+  
+  try {
+    const data = await api.restaurants(params);
+    // ... рендерим реальные карточки ...
+  } catch (e) {
+    // ...
+  }
+}
+
 document.getElementById('search-btn').addEventListener('click', loadRestaurants);
 document.getElementById('search').addEventListener('keydown', e => { if (e.key === 'Enter') loadRestaurants(); });
 loadRestaurants();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 600, once: true, offset: 80 });
+</script>
+<!-- в конце body, после всех скриптов -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 </body>
 </html>

@@ -120,6 +120,35 @@
     draw();
   }
 
+  // Вспомогательная функция для отрисовки скелетона таблицы
+function renderTableSkeleton(tbody, rowsCount = 5, colsCount = 7) {
+  tbody.innerHTML = Array.from({ length: rowsCount }).map(() => `
+    <tr class="skeleton-row">
+      ${Array.from({ length: colsCount }).map(() => `
+        <td><div class="skeleton-line"></div></td>
+      `).join('')}
+    </tr>
+  `).join('');
+}
+
+// Пример использования внутри loadBookings() или loadUsers():
+async function loadBookings() {
+  const tbody = document.getElementById('bookings-tbody'); // или контейнер таблицы
+  if (!tbody) return;
+
+  // 1. Показываем скелетон-строки перед запросом
+  // Если таблицы еще нет в DOM, можно сначала вставить пустую таблицу с tbody
+  renderTableSkeleton(tbody, 5, 8); 
+
+  try {
+    const data = await api.adminBookings(params);
+    // 2. Заменяем скелетон на реальные данные
+    // ...
+  } catch (e) {
+    // ...
+  }
+}
+
   /* =========================================================
    * БРОНИ
    * ========================================================= */
@@ -192,18 +221,30 @@
           </td>
         </tr>
       `;
-
       // Функция привязки событий к кнопкам
-      const bindRowActions = (container) => {
+                const bindRowActions = (container) => {
         container.querySelectorAll('button[data-act]').forEach(btn => {
           btn.addEventListener('click', async () => {
             const id = parseInt(btn.dataset.id, 10);
             const act = btn.dataset.act;
+            
+            // Находим бейдж в этой же строке таблицы
+            const badge = btn.closest('tr').querySelector('.badge');
+            
             try {
               if (act === 'confirm' || act === 'pending') {
                 await api.adminUpdateBookingStatus(id, act === 'confirm' ? 'confirmed' : 'pending');
+                
+                // 👇 ДОБАВЛЯЕМ ЭТОТ БЛОК ДЛЯ АНИМАЦИИ ВСПЫШКИ
+                if (badge) {
+                  badge.classList.add('status-change');
+                  setTimeout(() => badge.classList.remove('status-change'), 500);
+                }
+                
                 loadBookings(); loadStats();
               }
+              // ... остальной код (delete, edit)
+              // ... остальной код
               if (act === 'delete') {
                 if (!confirm('Удалить бронь #' + id + '?')) return;
                 await api.adminDeleteBooking(id);
@@ -273,6 +314,24 @@
     bState.per_page = parseInt(e.target.value, 10);
     bState.page = 1; loadBookings();
   });
+  // Пример внутри обработчика кнопки в таблице броней
+btn.addEventListener('click', async () => {
+  const badge = btn.closest('tr').querySelector('.badge');
+  
+  try {
+    await api.adminUpdateBookingStatus(id, 'confirmed');
+    
+    // Визуальное подтверждение: добавляем класс для анимации
+    badge.classList.add('status-change');
+    
+    // Убираем класс через 500мс, чтобы анимация могла сработать снова в будущем
+    setTimeout(() => badge.classList.remove('status-change'), 500);
+    
+    loadBookings(); // Перезагружаем таблицу
+  } catch (e) {
+    alert(e.message);
+  }
+});
 
   /* =========================================================
    * ПОЛЬЗОВАТЕЛИ (Оставляем как было, тут виртуализация не нужна)
