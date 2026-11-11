@@ -19,12 +19,10 @@ function showUser(user) {
   if (guestBox) guestBox.classList.add('hidden');
   if (userBox)  userBox.classList.remove('hidden');
 
-  // ИСПРАВЛЕНО: используем full_name (а не name)
   if (nameEl) {
     nameEl.textContent = user.full_name || user.login || '';
   }
 
-  // Логика для ссылки "Панель менеджера"
   if (mgrLink) {
     if (user.role === 'manager' || user.role === 'admin') {
       mgrLink.classList.remove('hidden');
@@ -38,26 +36,22 @@ function showUser(user) {
   if (nav) {
     let adminLink = document.getElementById('admin-link');
     
-    // Если админ, а ссылки еще нет — создаем её
     if (user.role === 'admin' && !adminLink) {
       adminLink = document.createElement('a');
       adminLink.href = 'admin.html';
       adminLink.id = 'admin-link';
       adminLink.textContent = 'Админка';
       
-      // Вставляем перед кнопкой "Выйти"
       const logoutBtn = nav.querySelector('#logout-btn');
       if (logoutBtn) {
         nav.insertBefore(adminLink, logoutBtn);
       } else {
-        nav.appendChild(adminLink); // на случай, если кнопки выхода нет
+        nav.appendChild(adminLink);
       }
     } 
-    // Если ссылка уже есть, но пользователь не админ — скрываем
     else if (adminLink && user.role !== 'admin') {
       adminLink.classList.add('hidden');
     }
-    // Если ссылка есть и пользователь админ — показываем
     else if (adminLink && user.role === 'admin') {
       adminLink.classList.remove('hidden');
     }
@@ -70,7 +64,6 @@ function showGuest() {
   if (guestBox) guestBox.classList.remove('hidden');
   if (userBox)  userBox.classList.add('hidden');
 
-  // Скрываем ссылку на админку, если пользователь вышел
   const adminLink = document.getElementById('admin-link');
   if (adminLink) {
     adminLink.classList.add('hidden');
@@ -91,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   initLogout();
 });
+
 /* =========================================================
    RIPPLE-ЭФФЕКТ ДЛЯ КНОПОК
    ========================================================= */
@@ -110,13 +104,3 @@ document.addEventListener('click', (e) => {
   btn.appendChild(span);
   setTimeout(() => span.remove(), 600);
 });
-// Открытие
-document.getElementById('open-modal-btn').onclick = () => 
-  document.getElementById('edit-modal').classList.remove('hidden');
-
-// Закрытие (по кнопке или клику на фон)
-document.getElementById('edit-modal').onclick = (e) => {
-  if (e.target.id === 'edit-modal' || e.target.id === 'close-modal-btn') {
-    e.target.closest('.modal').classList.add('hidden');
-  }
-};

@@ -3,8 +3,10 @@
   // 1. Проверка авторизации и прав
   const user = await checkAuth();
   if (!user || user.role !== 'admin') {
-    document.getElementById('access-msg').innerHTML =
-      '<div class="alert error">Доступ только для администратора</div>';
+    const accessMsg = document.getElementById('access-msg');
+    if (accessMsg) {
+      accessMsg.innerHTML = '<div class="alert error">Доступ только для администратора</div>';
+    }
     document.querySelectorAll('.profile-tabs, .stats, .tab-panel')
       .forEach(el => el.classList.add('hidden'));
     return;
@@ -31,15 +33,18 @@
   async function loadStats() {
     try {
       const s = await api.adminStats();
-      document.getElementById('stats').innerHTML = `
-        <div class="stat-card"><div class="num">${s.users}</div><div class="lbl">Пользователей</div></div>
-        <div class="stat-card"><div class="num">${s.blocked}</div><div class="lbl">Заблокировано</div></div>
-        <div class="stat-card"><div class="num">${s.restaurants}</div><div class="lbl">Ресторанов</div></div>
-        <div class="stat-card"><div class="num">${s.bookings}</div><div class="lbl">Всего броней</div></div>
-        <div class="stat-card"><div class="num">${s.pending}</div><div class="lbl">Ожидают</div></div>
-        <div class="stat-card"><div class="num">${s.confirmed}</div><div class="lbl">Подтверждены</div></div>
-        <div class="stat-card"><div class="num">${s.cancelled}</div><div class="lbl">Отменены</div></div>
-      `;
+      const statsEl = document.getElementById('stats');
+      if (statsEl) {
+        statsEl.innerHTML = `
+          <div class="stat-card"><div class="num">${s.users}</div><div class="lbl">Пользователей</div></div>
+          <div class="stat-card"><div class="num">${s.blocked}</div><div class="lbl">Заблокировано</div></div>
+          <div class="stat-card"><div class="num">${s.restaurants}</div><div class="lbl">Ресторанов</div></div>
+          <div class="stat-card"><div class="num">${s.bookings}</div><div class="lbl">Всего броней</div></div>
+          <div class="stat-card"><div class="num">${s.pending}</div><div class="lbl">Ожидают</div></div>
+          <div class="stat-card"><div class="num">${s.confirmed}</div><div class="lbl">Подтверждены</div></div>
+          <div class="stat-card"><div class="num">${s.cancelled}</div><div class="lbl">Отменены</div></div>
+        `;
+      }
     } catch (e) {
       console.error('Stats error:', e);
     }
@@ -89,25 +94,20 @@
     });
   }
 
-  // ВИРТУАЛЬНЫЙ СКРОЛЛ ДЛЯ БРОНЕЙ
-  // (Рендерит только видимые строки в tbody, а не всю таблицу целиком)
   function renderVirtualTable(tbody, items, rowHeight, buildRowHtml, bindRowActions) {
-    const visibleCount = Math.ceil(600 / rowHeight) + 4; // ~30 строк
+    const visibleCount = Math.ceil(600 / rowHeight) + 4; 
     let start = 0;
 
     function draw() {
       const end = Math.min(items.length, start + visibleCount);
-      // Создаем "прокладку" сверху, которая имитирует высоту невидимых строк
       tbody.innerHTML = `
         <tr style="height:${start * rowHeight}px;"><td colspan="8" style="padding:0; border:none;"></td></tr>
         ${items.slice(start, end).map(buildRowHtml).join('')}
         <tr style="height:${(items.length - end) * rowHeight}px;"><td colspan="8" style="padding:0; border:none;"></td></tr>
       `;
-      // Перепривязываем обработчики к новым кнопкам
       bindRowActions(tbody);
     }
 
-    // Вешаем обработчик на скролл-контейнер
     tbody.parentElement.parentElement.onscroll = (e) => {
       const newStart = Math.floor(e.target.scrollTop / rowHeight);
       if (newStart !== start && newStart >= 0) {
@@ -115,70 +115,70 @@
         draw();
       }
     };
-    
-    // Первичная отрисовка
     draw();
   }
 
-  // Вспомогательная функция для отрисовки скелетона таблицы
-function renderTableSkeleton(tbody, rowsCount = 5, colsCount = 7) {
-  tbody.innerHTML = Array.from({ length: rowsCount }).map(() => `
-    <tr class="skeleton-row">
-      ${Array.from({ length: colsCount }).map(() => `
-        <td><div class="skeleton-line"></div></td>
-      `).join('')}
-    </tr>
-  `).join('');
-}
-
-// Пример использования внутри loadBookings() или loadUsers():
-async function loadBookings() {
-  const tbody = document.getElementById('bookings-tbody'); // или контейнер таблицы
-  if (!tbody) return;
-
-  // 1. Показываем скелетон-строки перед запросом
-  // Если таблицы еще нет в DOM, можно сначала вставить пустую таблицу с tbody
-  renderTableSkeleton(tbody, 5, 8); 
-
-  try {
-    const data = await api.adminBookings(params);
-    // 2. Заменяем скелетон на реальные данные
-    // ...
-  } catch (e) {
-    // ...
+  // Скелетон для таблиц
+  function renderTableSkeleton(tbody, rowsCount = 5, colsCount = 7) {
+    if (!tbody) return;
+    tbody.innerHTML = Array.from({ length: rowsCount }).map(() => `
+      <tr class="skeleton-row">
+        ${Array.from({ length: colsCount }).map(() => `
+          <td><div class="skeleton-line"></div></td>
+        `).join('')}
+      </tr>
+    `).join('');
   }
-}
 
   /* =========================================================
    * БРОНИ
    * ========================================================= */
-  let bState = { page: 1, per_page: 50, sort: 'id', dir: 'desc' }; // Увеличили per_page, чтобы было что скроллить
+  let bState = { page: 1, per_page: 50, sort: 'id', dir: 'desc' };
 
   async function loadBookings() {
     const box   = document.getElementById('bookings-box');
     const pager = document.getElementById('bookings-pager');
+    if (!box) return;
+
     const params = {
       page: bState.page, per_page: bState.per_page,
       sort: bState.sort, dir: bState.dir,
     };
-    const q = document.getElementById('b-q').value.trim();
-    const s = document.getElementById('b-status').value;
-    const d = document.getElementById('b-date').value;
+    const q = document.getElementById('b-q')?.value.trim() || '';
+    const s = document.getElementById('b-status')?.value || '';
+    const d = document.getElementById('b-date')?.value || '';
     if (q) params.q = q;
     if (s) params.status = s;
     if (d) params.date = d;
 
-    box.innerHTML = '<div class="empty-state">Загрузка...</div>';
+    // Сначала скелетон (чтобы структура таблицы была известна)
+    box.innerHTML = `
+      <div style="max-height: 600px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+        <table style="margin: 0;">
+          <thead style="position: sticky; top: 0; z-index: 10;">
+            <tr>
+              <th>ID</th><th>Клиент</th><th>Ресторан</th><th>Дата/время</th>
+              <th>Столик</th><th>Гостей</th><th>Статус</th><th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody"></tbody>
+        </table>
+      </div>
+    `;
+    const tbody = document.getElementById('bookings-tbody');
+    renderTableSkeleton(tbody, 5, 8);
+
     try {
       const data = await api.adminBookings(params);
       const items = data.items || [];
+      
       if (!items.length) {
         box.innerHTML = '<div class="empty-state">Броней нет</div>';
         pager.innerHTML = '';
         return;
       }
       
-      // Оборачиваем таблицу в контейнер с фиксированной высотой для скролла
+      // Пересобираем таблицу с сортировкой
       box.innerHTML = `
         <div style="max-height: 600px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
           <table style="margin: 0;">
@@ -199,9 +199,8 @@ async function loadBookings() {
         </div>
       `;
       
-      const tbody = document.getElementById('bookings-tbody');
+      const tbodyReady = document.getElementById('bookings-tbody');
       
-      // Функция рендера одной строки
       const buildRowHtml = (b) => `
         <tr>
           <td>${b.id}</td>
@@ -221,21 +220,19 @@ async function loadBookings() {
           </td>
         </tr>
       `;
-      // Функция привязки событий к кнопкам
-                const bindRowActions = (container) => {
+
+      const bindRowActions = (container) => {
         container.querySelectorAll('button[data-act]').forEach(btn => {
           btn.addEventListener('click', async () => {
             const id = parseInt(btn.dataset.id, 10);
             const act = btn.dataset.act;
-            
-            // Находим бейдж в этой же строке таблицы
             const badge = btn.closest('tr').querySelector('.badge');
             
             try {
               if (act === 'confirm' || act === 'pending') {
                 await api.adminUpdateBookingStatus(id, act === 'confirm' ? 'confirmed' : 'pending');
                 
-                // 👇 ДОБАВЛЯЕМ ЭТОТ БЛОК ДЛЯ АНИМАЦИИ ВСПЫШКИ
+                // Анимация вспышки статуса
                 if (badge) {
                   badge.classList.add('status-change');
                   setTimeout(() => badge.classList.remove('status-change'), 500);
@@ -243,8 +240,6 @@ async function loadBookings() {
                 
                 loadBookings(); loadStats();
               }
-              // ... остальной код (delete, edit)
-              // ... остальной код
               if (act === 'delete') {
                 if (!confirm('Удалить бронь #' + id + '?')) return;
                 await api.adminDeleteBooking(id);
@@ -265,8 +260,7 @@ async function loadBookings() {
         });
       };
 
-      // Запуск виртуального скролла
-      renderVirtualTable(tbody, items, 50, buildRowHtml, bindRowActions);
+      renderVirtualTable(tbodyReady, items, 50, buildRowHtml, bindRowActions);
       
       bindSorting(box, bState, loadBookings);
       renderPager(pager, data.page, data.pages, p => { bState.page = p; loadBookings(); });
@@ -276,77 +270,67 @@ async function loadBookings() {
     }
   }
 
-  // Модалка редактирования
-  document.getElementById('edit-cancel').addEventListener('click', () => {
-    document.getElementById('edit-modal').classList.add('hidden');
-  });
+  // Модалка редактирования (безопасное подключение)
+  const editCancel = document.getElementById('edit-cancel');
+  if (editCancel) {
+    editCancel.addEventListener('click', () => {
+      document.getElementById('edit-modal').classList.add('hidden');
+    });
+  }
 
-  document.getElementById('edit-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('edit-msg');
-    msg.innerHTML = '';
-    const fd = new FormData(e.target);
-    const id = parseInt(fd.get('booking_id'), 10);
-    
-    try {
-      await api.adminUpdateBooking(id, {
-        booking_date: fd.get('booking_date'),
-        booking_time: fd.get('booking_time'),
-        guests: parseInt(fd.get('guests'), 10),
-        status: fd.get('status'),
-        comment: fd.get('comment'),
-      });
-      msg.innerHTML = '<div class="alert success">Сохранено</div>';
-      setTimeout(() => {
-        document.getElementById('edit-modal').classList.add('hidden');
-        loadBookings(); loadStats();
-      }, 500);
-    } catch (err) {
-      msg.innerHTML = `<div class="alert error">${escapeHtml(err.message)}</div>`;
-    }
-  });
+  const editForm = document.getElementById('edit-form');
+  if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('edit-msg');
+      msg.innerHTML = '';
+      const fd = new FormData(e.target);
+      const id = parseInt(fd.get('booking_id'), 10);
+      
+      try {
+        await api.adminUpdateBooking(id, {
+          booking_date: fd.get('booking_date'),
+          booking_time: fd.get('booking_time'),
+          guests: parseInt(fd.get('guests'), 10),
+          status: fd.get('status'),
+          comment: fd.get('comment'),
+        });
+        msg.innerHTML = '<div class="alert success">Сохранено</div>';
+        setTimeout(() => {
+          document.getElementById('edit-modal').classList.add('hidden');
+          loadBookings(); loadStats();
+        }, 500);
+      } catch (err) {
+        msg.innerHTML = `<div class="alert error">${escapeHtml(err.message)}</div>`;
+      }
+    });
+  }
 
   // Фильтры броней
-  document.getElementById('b-search').addEventListener('click', () => { bState.page = 1; loadBookings(); });
-  document.getElementById('b-status').addEventListener('change', () => { bState.page = 1; loadBookings(); });
-  document.getElementById('b-date').addEventListener('change', () => { bState.page = 1; loadBookings(); });
-  document.getElementById('b-per').addEventListener('change', (e) => {
+  document.getElementById('b-search')?.addEventListener('click', () => { bState.page = 1; loadBookings(); });
+  document.getElementById('b-status')?.addEventListener('change', () => { bState.page = 1; loadBookings(); });
+  document.getElementById('b-date')?.addEventListener('change', () => { bState.page = 1; loadBookings(); });
+  document.getElementById('b-per')?.addEventListener('change', (e) => {
     bState.per_page = parseInt(e.target.value, 10);
     bState.page = 1; loadBookings();
   });
-  // Пример внутри обработчика кнопки в таблице броней
-btn.addEventListener('click', async () => {
-  const badge = btn.closest('tr').querySelector('.badge');
-  
-  try {
-    await api.adminUpdateBookingStatus(id, 'confirmed');
-    
-    // Визуальное подтверждение: добавляем класс для анимации
-    badge.classList.add('status-change');
-    
-    // Убираем класс через 500мс, чтобы анимация могла сработать снова в будущем
-    setTimeout(() => badge.classList.remove('status-change'), 500);
-    
-    loadBookings(); // Перезагружаем таблицу
-  } catch (e) {
-    alert(e.message);
-  }
-});
 
   /* =========================================================
-   * ПОЛЬЗОВАТЕЛИ (Оставляем как было, тут виртуализация не нужна)
+   * ПОЛЬЗОВАТЕЛИ
    * ========================================================= */
   let uState = { page: 1, per_page: 10, sort: 'id', dir: 'desc' };
 
   async function loadUsers() {
     const box   = document.getElementById('users-box');
     const pager = document.getElementById('users-pager');
+    if (!box) return;
+
     const params = {
       page: uState.page, per_page: uState.per_page,
       sort: uState.sort, dir: uState.dir,
     };
-    const q = document.getElementById('u-q').value.trim();
-    const role = document.getElementById('u-role').value;
+    const q = document.getElementById('u-q')?.value.trim() || '';
+    const role = document.getElementById('u-role')?.value || '';
     if (q) params.q = q;
     if (role) params.role = role;
 
@@ -443,9 +427,9 @@ btn.addEventListener('click', async () => {
     }
   }
 
-  document.getElementById('u-search').addEventListener('click', () => { uState.page = 1; loadUsers(); });
-  document.getElementById('u-role').addEventListener('change', () => { uState.page = 1; loadUsers(); });
-  document.getElementById('u-per').addEventListener('change', (e) => {
+  document.getElementById('u-search')?.addEventListener('click', () => { uState.page = 1; loadUsers(); });
+  document.getElementById('u-role')?.addEventListener('change', () => { uState.page = 1; loadUsers(); });
+  document.getElementById('u-per')?.addEventListener('change', (e) => {
     uState.per_page = parseInt(e.target.value, 10);
     uState.page = 1; loadUsers();
   });
