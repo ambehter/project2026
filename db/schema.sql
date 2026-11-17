@@ -29,7 +29,9 @@ CREATE TABLE users (
   phone VARCHAR(20) NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('user','manager','admin') NOT NULL DEFAULT 'user',
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_users_role (role),      -- <--- ДОБАВИТЬ
+  INDEX idx_users_email (email)     -- <--- ДОБАВИТЬ
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==================== csrf_tokens ====================
@@ -119,9 +121,9 @@ CREATE TABLE bookings (
   CONSTRAINT fk_book_table FOREIGN KEY (table_id)
     REFERENCES tables(id) ON DELETE CASCADE,
   INDEX idx_table_date (table_id, booking_date),
-  INDEX idx_user_date (user_id, booking_date)
+  INDEX idx_user_date (user_id, booking_date),
+  INDEX idx_bookings_status_date (status, booking_date, id) -- <--- ДОБАВИТЬ
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- ==================== reviews ====================
 CREATE TABLE reviews (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
