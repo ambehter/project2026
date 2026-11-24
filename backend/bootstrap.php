@@ -31,13 +31,15 @@ function db(): PDO
 
 function bootstrapSession(): void
 {
-    if (session_status() === PHP_SESSION_ACTIVE) return;
-    
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        return;
+    }
+
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
-        'domain'   => 'project2026', // <--- ЖЕСТКО ЗАДАЕМ ДОМЕН
-        'secure'   => false,         // Отключаем HTTPS для локалки
+        'domain'   => '', // Оставляем пустым, чтобы PHP сам определил текущий хост (localhost / project2026)
+        'secure'   => false,
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
@@ -45,19 +47,21 @@ function bootstrapSession(): void
 }
 
 /* --- CORS --- */
-function sendCors(): void
-{
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    if ($origin !== '') {
-        header("Access-Control-Allow-Origin: $origin");
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
-        header('Vary: Origin');
-    }
-    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
-        http_response_code(204);
-        exit;
+if (!function_exists('sendCors')) {
+    function sendCors(): void
+    {
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if ($origin !== '') {
+            header("Access-Control-Allow-Origin: $origin");
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
+            header('Vary: Origin');
+        }
+        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+            http_response_code(204);
+            exit;
+        }
     }
 }
 

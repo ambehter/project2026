@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 // 1. Отключаем вывод ошибок в браузер (чтобы не ломать JSON)
@@ -12,22 +13,19 @@ require_once __DIR__ . '/auth-helpers.php';
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/router.php';
 
-// 3. Отправляем CORS заголовки
+// 3. Отправляем CORS заголовки (функция уже объявлена в bootstrap.php)
 sendCors();
 
 // 4. Получаем метод и URI
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$uri    = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
-// Убираем /backend/index.php из начала пути
+// Убираем /backend/index.php и /backend из начала пути
 $uri = preg_replace('#^/backend/index\.php#', '', $uri);
 $uri = preg_replace('#^/backend#', '', $uri);
 
 if (strpos($uri, '/api') !== 0) {
     jsonError('Endpoint not found', 404);
-}
-if ($uri === '') {
-    $uri = '/';
 }
 
 // 5. Обработка запроса и перехват исключений

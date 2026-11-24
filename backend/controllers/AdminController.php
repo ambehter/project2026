@@ -34,21 +34,30 @@ class AdminController
     /* =========================================================
      * Брони: список с пагинацией, сортировкой, фильтрами
      * GET /api/admin/bookings
+     *
+     * Параметры:
+     *   page      (int, >=1,        по умолчанию 1)
+     *   per_page  (int, 1..100,     по умолчанию 10)
+     *   status    pending|confirmed|cancelled
+     *   date      YYYY-MM-DD
+     *   q         поиск по ФИО/email пользователя, названию ресторана
+     *   sort      id|booking_date|created_at|status|guests
+     *   dir       asc|desc
      * ========================================================= */
     public static function bookings(): void
     {
         requireRole('admin');
 
-        // 1. Пагинация
+        // 1. Пагинация (защита от per_page=1000000 и от 0/отрицательных)
         $page    = max(1, (int)($_GET['page'] ?? 1));
         $perPage = max(1, min(100, (int)($_GET['per_page'] ?? 10)));
-        
-        // 2. Фильтры
-        $status  = trim((string)($_GET['status'] ?? ''));
-        $date    = trim((string)($_GET['date'] ?? ''));
-        $q       = trim((string)($_GET['q'] ?? ''));
 
-        // 3. Сортировка (белый список для защиты от SQL-инъекций)
+        // 2. Фильтры
+        $status = trim((string)($_GET['status'] ?? ''));
+        $date   = trim((string)($_GET['date'] ?? ''));
+        $q      = trim((string)($_GET['q'] ?? ''));
+
+        // 3. Сортировка — БЕЛЫЙ СПИСОК (защита от SQL-инъекций в ORDER BY)
         $sortMap = [
             'id'           => 'b.id',
             'booking_date' => 'b.booking_date',
@@ -64,7 +73,7 @@ class AdminController
         $where  = [];
         $params = [];
 
-        if (in_array($status, ['pending','confirmed','cancelled'], true)) {
+        if (in_array($status, ['pending', 'confirmed', 'cancelled'], true)) {
             $where[]  = 'b.status = ?';
             $params[] = $status;
         }
@@ -83,7 +92,7 @@ class AdminController
 
         $pdo = db();
 
-        // 5. Подсчёт общего количества
+        // 5. Подсчёт общего количества (для pages)
         $cnt = $pdo->prepare("
             SELECT COUNT(*)
             FROM bookings b
@@ -96,9 +105,10 @@ class AdminController
         $cnt->execute($params);
         $total = (int)$cnt->fetchColumn();
 
+        // 6. OFFSET считаем ПОСЛЕ приведения perPage к допустимому диапазону
         $offset = ($page - 1) * $perPage;
 
-        // 6. Выборка данных
+        // 7. Выборка данных. $sort и $dir — уже безопасные (из белого списка).
         $sql = "
             SELECT b.id, b.booking_date, b.booking_time, b.guests, b.status,
                    b.comment, b.created_at,
@@ -126,6 +136,8 @@ class AdminController
             'per_page' => $perPage,
             'total'    => $total,
             'pages'    => (int)ceil($total / $perPage),
+            'sort'     => $sortKey,
+            'dir'      => strtolower($dir),
         ]);
     }
 
@@ -138,18 +150,18 @@ class AdminController
         requireRole('admin');
         $body   = readJson();
         $status = (string)($body['status'] ?? '');
-        
-        if (!in_array($status, ['pending','confirmed','cancelled'], true)) {
+
+        if (!in_array($status, ['pending', 'confirmed', 'cancelled'], true)) {
             throw new ValidationException('status must be pending|confirmed|cancelled');
         }
-        
+
         $pdo = db();
         $chk = $pdo->prepare('SELECT id FROM bookings WHERE id = ?');
         $chk->execute([(int)$id]);
         if (!$chk->fetchColumn()) {
             throw new NotFoundException('Booking not found');
         }
-        
+
         $upd = $pdo->prepare('UPDATE bookings SET status = ? WHERE id = ?');
         $upd->execute([$status, (int)$id]);
         jsonOk(['ok' => true]);
@@ -181,7 +193,7 @@ class AdminController
         if ($guests < 1 || $guests > 20) {
             throw new ValidationException('Гостей от 1 до 20');
         }
-        if (!in_array($status, ['pending','confirmed','cancelled'], true)) {
+        if (!in_array($status, ['pending', 'confirmed', 'cancelled'], true)) {
             throw new ValidationException('Некорректный статус');
         }
 
@@ -253,16 +265,28 @@ class AdminController
     /* =========================================================
      * Пользователи: пагинация, сортировка, поиск, фильтр роли
      * GET /api/admin/users
+     *
+     * Параметры:
+     *   page      (int, >=1,        по умолчанию 1)
+     *   per_page  (int, 1..100,     по умолчанию 10)
+     *   q         поиск по login/full_name/email
+     *   role      user|manager|admin
+     *   sort      id|login|full_name|email|created_at|role
+     *   dir       asc|desc
      * ========================================================= */
     public static function users(): void
     {
         requireRole('admin');
 
+        // 1. Пагинация
         $page    = max(1, (int)($_GET['page'] ?? 1));
         $perPage = max(1, min(100, (int)($_GET['per_page'] ?? 10)));
-        $q       = trim((string)($_GET['q'] ?? ''));
-        $role    = trim((string)($_GET['role'] ?? ''));
 
+        // 2. Фильтры
+        $q    = trim((string)($_GET['q'] ?? ''));
+        $role = trim((string)($_GET['role'] ?? ''));
+
+        // 3. Сортировка — БЕЛЫЙ СПИСОК
         $sortMap = [
             'id'         => 'u.id',
             'login'      => 'u.login',
@@ -275,6 +299,7 @@ class AdminController
         $sort    = $sortMap[$sortKey] ?? 'u.id';
         $dir     = (strtolower($_GET['dir'] ?? 'desc') === 'asc') ? 'ASC' : 'DESC';
 
+        // 4. WHERE
         $where  = [];
         $params = [];
         if ($q !== '') {
@@ -284,18 +309,22 @@ class AdminController
             $params[] = $like;
             $params[] = $like;
         }
-        if (in_array($role, ['user','manager','admin'], true)) {
+        if (in_array($role, ['user', 'manager', 'admin'], true)) {
             $where[]  = 'u.role = ?';
             $params[] = $role;
         }
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         $pdo = db();
+
+        // 5. Total
         $cnt = $pdo->prepare("SELECT COUNT(*) FROM users u $whereSql");
         $cnt->execute($params);
         $total = (int)$cnt->fetchColumn();
 
         $offset = ($page - 1) * $perPage;
+
+        // 6. Данные
         $sql = "
             SELECT u.id, u.login, u.full_name, u.email, u.phone,
                    u.role, u.is_blocked, u.created_at
@@ -313,6 +342,8 @@ class AdminController
             'per_page' => $perPage,
             'total'    => $total,
             'pages'    => (int)ceil($total / $perPage),
+            'sort'     => $sortKey,
+            'dir'      => strtolower($dir),
         ]);
     }
 
@@ -327,7 +358,7 @@ class AdminController
         $role   = (string)($body['role'] ?? '');
         $userId = (int)$id;
 
-        if (!in_array($role, ['user','manager','admin'], true)) {
+        if (!in_array($role, ['user', 'manager', 'admin'], true)) {
             throw new ValidationException('role must be user|manager|admin');
         }
         // Нельзя разжаловать себя
